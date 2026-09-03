@@ -1,8 +1,5 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import * as fs from "fs";
-import * as path from "path";
-import * as os from "os";
 import {
   fetchModels,
   fetchModelWithLineage,
@@ -11,12 +8,17 @@ import {
   buildLineageUrl,
   getResourceTypeIcon,
   getMaterializationIcon,
-  buildApiUrl,
-  fetchFromApi,
 } from "./api";
-import { ModelNode, SourceNode, EnvironmentModel, LineageNode, ProjectModel, EnvironmentDeploymentType } from "./types";
+import { ModelNode, SourceNode, LineageNode } from "./types";
+import {
+  DEPLOYMENT_TYPE_INFO,
+  EnvironmentWithProject,
+  fetchProductionEnvironments,
+  inferDeploymentType,
+} from "./environment_utils";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
 
+<<<<<<< HEAD
 const escapeHtml = (value: string): string =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -1331,6 +1333,8 @@ async function openDbtCloudLineageDiagram(
   await open(`file://${filePath}`);
 }
 
+=======
+>>>>>>> origin/ext/dbtcatalog
 function LineageDetail({
   node,
   environmentId,
@@ -1495,16 +1499,6 @@ function LineageDetail({
                   await openEnvironmentLineageDiagram(environmentId, "dbt Cloud", fullModel.uniqueId, fullModel.name);
                 }}
               />
-              <Action
-                title="Generate Mermaid Diagram"
-                icon={Icon.Code}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                onAction={async () => {
-                  await showToast(Toast.Style.Animated, "Generating diagram...");
-                  await openInteractiveLineageDiagram(node as ModelNode, fullModel, "dbt Cloud");
-                  await showToast(Toast.Style.Success, "Diagram opened in browser");
-                }}
-              />
             </>
           )}
           <Action.OpenInBrowser
@@ -1651,116 +1645,6 @@ function LineageList({
           description="This environment doesn't have any models or sources in the catalog yet."
         />
       )}
-    </List>
-  );
-}
-
-// Projects list within a deployment type for Lineage
-function ProjectsList({
-  deploymentType,
-  projects,
-}: {
-  deploymentType: DeploymentTypeGroup;
-  projects: DeploymentTypeGroup["projects"];
-}) {
-  return (
-    <List
-      searchBarPlaceholder={`Search projects in ${deploymentType.displayName}...`}
-      navigationTitle={`${deploymentType.icon} ${deploymentType.displayName} - Select Project`}
-    >
-      <List.Section
-        title={`${deploymentType.icon} ${deploymentType.displayName}`}
-        subtitle={`${projects.length} project(s)`}
-      >
-        {projects.map(({ projectId, projectName, environments }) => {
-          const envCount = environments.length;
-          const primaryEnv = environments[0];
-
-          return (
-            <List.Item
-              key={`${projectId}`}
-              icon={Icon.Document}
-              title={projectName}
-              subtitle={envCount > 1 ? `${envCount} environments` : primaryEnv.name}
-              accessories={[{ text: `dbt ${primaryEnv.dbt_version}` }, { text: primaryEnv.connection?.type || "" }]}
-              actions={
-                <ActionPanel>
-                  {envCount === 1 ? (
-                    <Action.Push
-                      title="Explore Lineage"
-                      icon={Icon.Link}
-                      target={
-                        <LineageList
-                          environmentId={primaryEnv.id}
-                          environmentName={`${projectName} / ${deploymentType.displayName}`}
-                          projectId={primaryEnv.project_id}
-                        />
-                      }
-                    />
-                  ) : (
-                    <Action.Push
-                      title="Select Environment"
-                      icon={Icon.ArrowRight}
-                      target={
-                        <EnvironmentsList
-                          projectName={projectName}
-                          deploymentTypeName={deploymentType.displayName}
-                          environments={environments}
-                        />
-                      }
-                    />
-                  )}
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
-    </List>
-  );
-}
-
-// Environment selection within a project (when multiple environments exist)
-function EnvironmentsList({
-  projectName,
-  deploymentTypeName,
-  environments,
-}: {
-  projectName: string;
-  deploymentTypeName: string;
-  environments: EnvironmentWithProject[];
-}) {
-  return (
-    <List
-      searchBarPlaceholder={`Select environment for ${projectName}...`}
-      navigationTitle={`${projectName} - Select Environment`}
-    >
-      <List.Section title={projectName} subtitle={`${environments.length} environments`}>
-        {environments.map((env) => (
-          <List.Item
-            key={env.id}
-            icon={Icon.Globe}
-            title={env.name}
-            subtitle={env.connection?.type || ""}
-            accessories={[{ text: `dbt ${env.dbt_version}` }]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Explore Lineage"
-                  icon={Icon.Link}
-                  target={
-                    <LineageList
-                      environmentId={env.id}
-                      environmentName={`${projectName} / ${env.name}`}
-                      projectId={env.project_id}
-                    />
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
     </List>
   );
 }
