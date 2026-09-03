@@ -17,6 +17,18 @@ import {
 import { ModelNode, SourceNode, EnvironmentModel, LineageNode, ProjectModel, EnvironmentDeploymentType } from "./types";
 import { openEnvironmentLineageDiagram } from "./lineage_diagram";
 
+const escapeHtml = (value: string): string =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+// JSON.stringify does not escape "<", so raw output can terminate the enclosing <script> block.
+const safeJson = (value: unknown): string =>
+  JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+
 // Extended environment with project name
 interface EnvironmentWithProject extends EnvironmentModel {
   projectName: string;
@@ -219,7 +231,7 @@ async function openInteractiveLineageDiagram(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lineage: ${fullModel.name}</title>
+  <title>Lineage: ${escapeHtml(fullModel.name)}</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -329,8 +341,8 @@ async function openInteractiveLineageDiagram(
 <body>
   <div class="header">
     <div>
-      <h1>🔗 ${fullModel.name}</h1>
-      <div class="env">${environmentName}</div>
+      <h1>🔗 ${escapeHtml(fullModel.name)}</h1>
+      <div class="env">${escapeHtml(environmentName)}</div>
     </div>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:#e1f5fe;border:1px solid #01579b"></div> Source</div>
@@ -345,7 +357,9 @@ async function openInteractiveLineageDiagram(
     <div class="stat">⬇️ Downstream: <span class="stat-value">${fullModel.children?.length || 0}</span></div>
     <div class="stat">📊 Columns: <span class="stat-value">${fullModel.catalog?.columns?.length || 0}</span></div>
     <div class="stat">🧪 Tests: <span class="stat-value">${fullModel.tests?.length || 0}</span></div>
-    <div class="stat">📦 Materialization: <span class="stat-value">${fullModel.materializedType || "N/A"}</span></div>
+    <div class="stat">📦 Materialization: <span class="stat-value">${escapeHtml(
+      fullModel.materializedType || "N/A"
+    )}</span></div>
   </div>
   <div class="diagram-container">
     <pre class="mermaid">
@@ -354,12 +368,20 @@ ${mermaidCode}
   </div>
   <div class="info-panel">
     <h3>📋 Model Details</h3>
-    <div class="info-row"><span class="info-label">Database</span><span>${fullModel.database || "N/A"}</span></div>
-    <div class="info-row"><span class="info-label">Schema</span><span>${fullModel.schema || "N/A"}</span></div>
-    <div class="info-row"><span class="info-label">Access</span><span>${fullModel.access || "N/A"}</span></div>
+    <div class="info-row"><span class="info-label">Database</span><span>${escapeHtml(
+      fullModel.database || "N/A"
+    )}</span></div>
+    <div class="info-row"><span class="info-label">Schema</span><span>${escapeHtml(
+      fullModel.schema || "N/A"
+    )}</span></div>
+    <div class="info-row"><span class="info-label">Access</span><span>${escapeHtml(
+      fullModel.access || "N/A"
+    )}</span></div>
     ${
       fullModel.tags && fullModel.tags.length > 0
-        ? `<div class="info-row"><span class="info-label">Tags</span><span>${fullModel.tags.join(", ")}</span></div>`
+        ? `<div class="info-row"><span class="info-label">Tags</span><span>${escapeHtml(
+            fullModel.tags.join(", ")
+          )}</span></div>`
         : ""
     }
   </div>
@@ -533,7 +555,7 @@ async function openDbtCloudLineageDiagram(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lineage: ${selectedModel.name} | ${environmentName}</title>
+  <title>Lineage: ${escapeHtml(selectedModel.name)} | ${escapeHtml(environmentName)}</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
   <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
@@ -890,7 +912,7 @@ async function openDbtCloudLineageDiagram(
         dbt Cloud Lineage
       </div>
       <div class="breadcrumb">
-        ${environmentName} / <span id="current-node-name">${selectedModel.name}</span>
+        ${escapeHtml(environmentName)} / <span id="current-node-name">${escapeHtml(selectedModel.name)}</span>
       </div>
       <div class="stats-bar">
         <div class="stat">📦 Models: <span class="stat-value">${modelCount}</span></div>
@@ -949,9 +971,9 @@ async function openDbtCloudLineageDiagram(
   </div>
 
   <script>
-    const nodesData = ${JSON.stringify(nodes)};
-    const edgesData = ${JSON.stringify(edges)};
-    const initialSelectedId = '${nodeId(selectedModel.uniqueId)}';
+    const nodesData = ${safeJson(nodes)};
+    const edgesData = ${safeJson(edges)};
+    const initialSelectedId = ${safeJson(nodeId(selectedModel.uniqueId))};
 
     // Build lookup maps
     const nodeDataMap = new Map();
@@ -1066,6 +1088,15 @@ async function openDbtCloudLineageDiagram(
       }
     }
 
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function getUpstreamNodes(nodeId) {
       return cy.getElementById(nodeId).incomers('node').map(n => n.data());
     }
@@ -1087,17 +1118,17 @@ async function openDbtCloudLineageDiagram(
       panel.innerHTML = \`
         <div class="panel-section">
           <div class="panel-title">Selected Node</div>
-          <div class="model-name">\${data.label}</div>
+          <div class="model-name">\${esc(data.label)}</div>
           <div class="model-type">
-            <span class="model-type-badge \${data.type}">\${data.type}</span>
-            \${data.materialization ? \`<span class="model-type-badge">\${data.materialization}</span>\` : ''}
+            <span class="model-type-badge \${esc(data.type)}">\${esc(data.type)}</span>
+            \${data.materialization ? \`<span class="model-type-badge">\${esc(data.materialization)}</span>\` : ''}
           </div>
         </div>
 
         \${data.description ? \`
         <div class="panel-section">
           <div class="panel-title">Description</div>
-          <div class="description">\${data.description}</div>
+          <div class="description">\${esc(data.description)}</div>
         </div>
         \` : ''}
 
@@ -1106,11 +1137,11 @@ async function openDbtCloudLineageDiagram(
           <div class="info-grid">
             <div class="info-item">
               <div class="info-label">Database</div>
-              <div class="info-value">\${data.database || 'N/A'}</div>
+              <div class="info-value">\${esc(data.database || 'N/A')}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Schema</div>
-              <div class="info-value">\${data.schema || 'N/A'}</div>
+              <div class="info-value">\${esc(data.schema || 'N/A')}</div>
             </div>
           </div>
         </div>
@@ -1119,9 +1150,9 @@ async function openDbtCloudLineageDiagram(
           <div class="panel-title">Upstream <span class="count">\${upstream.length}</span></div>
           <div class="dep-list">
             \${upstream.length > 0 ? upstream.map(n => \`
-              <div class="dep-item" onclick="selectNode('\${n.id}')">
+              <div class="dep-item" onclick="selectNode('\${esc(n.id)}')">
                 <div class="dep-icon \${getTypeColor(n.type)}">\${getTypeIcon(n.type)}</div>
-                <span class="dep-item-name">\${n.label}</span>
+                <span class="dep-item-name">\${esc(n.label)}</span>
               </div>
             \`).join('') : '<div class="no-data">No upstream dependencies</div>'}
           </div>
@@ -1131,9 +1162,9 @@ async function openDbtCloudLineageDiagram(
           <div class="panel-title">Downstream <span class="count">\${downstream.length}</span></div>
           <div class="dep-list">
             \${downstream.length > 0 ? downstream.map(n => \`
-              <div class="dep-item" onclick="selectNode('\${n.id}')">
+              <div class="dep-item" onclick="selectNode('\${esc(n.id)}')">
                 <div class="dep-icon \${getTypeColor(n.type)}">\${getTypeIcon(n.type)}</div>
-                <span class="dep-item-name">\${n.label}</span>
+                <span class="dep-item-name">\${esc(n.label)}</span>
               </div>
             \`).join('') : '<div class="no-data">No downstream dependencies</div>'}
           </div>
@@ -1143,14 +1174,14 @@ async function openDbtCloudLineageDiagram(
         <div class="panel-section">
           <div class="panel-title">Tags</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            \${data.tags.map(t => \`<span class="tag">\${t}</span>\`).join('')}
+            \${data.tags.map(t => \`<span class="tag">\${esc(t)}</span>\`).join('')}
           </div>
         </div>
         \` : ''}
 
         <div class="panel-section">
           <div class="panel-title">Unique ID</div>
-          <div class="info-value" style="font-size:11px;word-break:break-all;">\${data.uniqueId}</div>
+          <div class="info-value" style="font-size:11px;word-break:break-all;">\${esc(data.uniqueId)}</div>
         </div>
       \`;
     }
@@ -1249,9 +1280,9 @@ async function openDbtCloudLineageDiagram(
 
       if (matches.length > 0) {
         searchResults.innerHTML = matches.map(n => \`
-          <div class="search-result-item" onclick="selectNode('\${n.data.id}'); searchInput.value = ''; searchResults.classList.remove('active');">
+          <div class="search-result-item" onclick="selectNode('\${esc(n.data.id)}'); searchInput.value = ''; searchResults.classList.remove('active');">
             <div class="dep-icon \${getTypeColor(n.data.type)}">\${getTypeIcon(n.data.type)}</div>
-            <span>\${n.data.label}</span>
+            <span>\${esc(n.data.label)}</span>
           </div>
         \`).join('');
         searchResults.classList.add('active');

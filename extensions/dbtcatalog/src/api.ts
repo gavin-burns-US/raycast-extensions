@@ -679,7 +679,7 @@ export async function fetchJobRunDetails(jobId: number, limit = 50): Promise<any
   const endpoint = buildApiUrl(`/jobs/${jobId}/runs/`, {
     limit,
     order_by: "-finished_at",
-    include_related: JSON.stringify(["trigger", "job", "environment"]),
+    include_related: "trigger,job,environment",
   });
 
   try {
