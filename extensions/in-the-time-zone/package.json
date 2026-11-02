@@ -5,6 +5,10 @@
   "description": "Visualize and scrub time across multiple time zones",
   "icon": "icon.png",
   "author": "i_idz",
+  "contributors": [
+    "ridemountainpig",
+    "gyim"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -42,6 +46,37 @@
         }
       ],
       "default": "system",
+      "required": false
+    },
+    {
+      "name": "showLocalTimezone",
+      "type": "checkbox",
+      "title": "Local Time Zone",
+      "label": "Show my local time zone",
+      "description": "When a pinned base city is in a different time zone from you, also show a Local row for where you are now.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "cityOrder",
+      "type": "dropdown",
+      "title": "City Order",
+      "description": "How cities are ordered. Custom keeps your own arrangement via the Move Up/Down actions.",
+      "data": [
+        {
+          "title": "GMT Offset (West → East)",
+          "value": "offset-asc"
+        },
+        {
+          "title": "GMT Offset (East → West)",
+          "value": "offset-desc"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ],
+      "default": "offset-asc",
       "required": false
     },
     {

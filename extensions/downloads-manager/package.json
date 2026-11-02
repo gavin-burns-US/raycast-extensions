@@ -15,7 +15,8 @@
     "0xdhrv",
     "YourMCGeek",
     "dhaydl",
-    "hugodemenez"
+    "hugodemenez",
+    "danieltsam"
   ],
   "categories": [
     "Productivity",
@@ -29,6 +30,24 @@
       "description": "Search and organize your downloaded files",
       "mode": "view",
       "preferences": [
+        {
+          "type": "dropdown",
+          "name": "primaryAction",
+          "title": "Primary Action",
+          "description": "The action performed when pressing Enter on a download",
+          "required": false,
+          "default": "open",
+          "data": [
+            {
+              "title": "Open",
+              "value": "open"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        },
         {
           "type": "checkbox",
           "name": "showHiddenFiles",
@@ -376,6 +395,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test:quicklook": "esbuild src/quicklook.ts --bundle --platform=node --format=cjs --outfile=.test-build/quicklook.cjs --log-level=error && node scripts/test-quicklook.mjs",
     "publish": "ray publish"
   },
   "platforms": [

@@ -1,5 +1,43 @@
 # GitHub Changelog
 
+## [Create Release and Dispatch Workflow Commands] - 2026-10-31
+
+- New **Create Release** command to publish a release with auto-suggested next tag, generated release notes, draft and pre-release options.
+- New **Dispatch Workflow** command to trigger `workflow_dispatch` workflows with their inputs, defaulting the ref to the branch of the latest run.
+- Dispatch Workflow: Pin workflows with ⌘P to list them first in the workflow picker; pins are stored per repository.
+- Dispatch Workflow: Remember the last selected repository.
+
+## [Mentions in AI Chat] - 2026-10-29
+
+- Add **Issues**, **Pull Requests**, and **Repositories** mention searches to the AI Chat composer's `@` menu. Without a query they list open issues and pull requests you're involved in, and your most recently pushed repositories.
+- Look up an exact issue or pull request from `owner/repo#123` or a GitHub URL.
+- Read the mentioned item's current details when sending: status, author, assignees, labels, branches and diff size for pull requests, and the description (up to 8,000 characters).
+- Update to Raycast API 2.10.0, Node 26 types, React 19.3, and TypeScript 5.9.
+
+## [Open Created Issue in Browser] - 2026-10-14
+
+- Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Review Pull Requests Skill] - 2026-09-24
+
+- Update to Raycast API 2.5.0 for public bundled-skill support.
+- Review pull request patches with concrete findings, workflow context, and explicit coverage limits.
+
+## [Restore My Repositories Filter] - 2026-09-24
+
+- Search Repositories, Issues, Pull Requests and Discussions: Restore the **My Repositories** filter, which searches repositories owned by your personal account and your organizations. **My Organizations** is still available for organization-only results.
+- Search Repositories: Fix recently visited repositories matching the wrong owners when an owner filter is selected.
+
+## [My Packages] - 2026-09-22
+
+- Add **My Packages** and **My Packages Menu Bar** to browse the packages you published to GitHub Packages.
+
+## [Fix Star Action Icon] - 2026-09-09
+
+- Search Repositories: Fix the broken Star action icon
+
 ## [Fix Stats for Large Accounts] - 2026-08-29
 
 - Split aggregate and list GraphQL requests so My GitHub Stats loads for accounts with large histories

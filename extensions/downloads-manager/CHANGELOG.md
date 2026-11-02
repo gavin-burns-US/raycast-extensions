@@ -1,5 +1,22 @@
 # Downloads Manager Changelog
 
+## [Fix Quick Look preview process leak] - 2026-11-01
+
+- Fixed Manage Downloads slowing down and becoming unresponsive on large Downloads folders. Quick Look previews that timed out leaked a background process and a temp directory for every previewed item; timed-out previews are now killed, and starting a new preview cancels the previous one.
+- Quick Look no longer runs for `.zip` and `.ipynb` files. `qlmanage` does not return for either type, so there was never a thumbnail to show.
+## [Add Rename action] - 2026-10-24
+
+- Added a Rename action to Manage Downloads (`⌘⇧R` on macOS, `Ctrl+Shift+R` on Windows) that renames the focused download and keeps your place in the list.
+
+## [Align shortcuts with Search Screenshots] - 2026-09-09
+
+Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
+
+- Added a Primary Action preference to copy downloads with Enter, while keeping Open as the default.
+- Added pasting the selected download to the focused app with Command+Enter on macOS or Ctrl+Enter on Windows.
+- Added Open and Reveal shortcuts and switched Copy Path to Raycast's standard platform-specific shortcut.
+- Organized the action menu consistently across list and grid layouts.
+
 ## [Add toggle to show filename being deleted permanently] - 2026-08-30
 
 - Added a toggle to the preference to show/hide the latest downloaded file being permanently deleted.
